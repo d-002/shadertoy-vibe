@@ -1,18 +1,20 @@
 import { useEffect, useRef, type PointerEvent } from 'react';
+import type { ShaderProject } from '../types/shader';
 import {
     createWebGLRenderer,
     type WebGLRenderer,
 } from '../utils/webglRenderer';
+import { EMPTY_KEYBOARD_STATE } from '../utils/keyboardTexture';
 
 type MouseState = [number, number, number, number];
 
 interface ShaderCanvasProps {
-    source: string;
+    project: ShaderProject;
     playing: boolean;
     onError: (message: string) => void;
 }
 
-export function ShaderCanvas({ source, playing, onError }: ShaderCanvasProps) {
+export function ShaderCanvas({ project, playing, onError }: ShaderCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const mouseRef = useRef<MouseState>([0, 0, 0, 0]);
     const playingRef = useRef(playing);
@@ -36,7 +38,7 @@ export function ShaderCanvas({ source, playing, onError }: ShaderCanvasProps) {
 
         let renderer: WebGLRenderer;
         try {
-            renderer = createWebGLRenderer(canvas, source);
+            renderer = createWebGLRenderer(canvas, project);
             onError('');
         } catch (error) {
             onError(errorMessage(error));
@@ -45,7 +47,12 @@ export function ShaderCanvas({ source, playing, onError }: ShaderCanvasProps) {
 
         const draw = (now: number) => {
             rafRef.current = 0;
-            renderer.render(now, mouseRef.current, playingRef.current);
+            renderer.render(
+                now,
+                mouseRef.current,
+                playingRef.current,
+                EMPTY_KEYBOARD_STATE,
+            );
             if (playingRef.current) {
                 rafRef.current = requestAnimationFrame(draw);
             }
@@ -59,7 +66,7 @@ export function ShaderCanvas({ source, playing, onError }: ShaderCanvasProps) {
             rafRef.current = 0;
             renderer.dispose();
         };
-    }, [source, onError]);
+    }, [project, onError]);
 
     const updateMouse = (
         event: PointerEvent<HTMLCanvasElement>,
@@ -69,14 +76,7 @@ export function ShaderCanvas({ source, playing, onError }: ShaderCanvasProps) {
         const x = event.clientX - rect.left;
         const y = rect.height - (event.clientY - rect.top);
         mouseRef.current = [x, y, pressed ? x : 0, pressed ? y : 0];
-        schedulePausedDraw();
     };
-
-    function schedulePausedDraw() {
-        if (!playingRef.current && drawRef.current && !rafRef.current) {
-            rafRef.current = requestAnimationFrame(drawRef.current);
-        }
-    }
 
     return (
         <canvas

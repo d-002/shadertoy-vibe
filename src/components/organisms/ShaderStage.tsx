@@ -1,11 +1,12 @@
 import type { RefObject } from 'react';
+import type { ShaderProject } from '../../types/shader';
 import { ShaderCanvas } from '../ShaderCanvas';
 import { ShaderErrorPanel } from '../atoms/ShaderErrorPanel';
 import { StageMessage } from '../atoms/StageMessage';
 
 interface ShaderStageProps {
     selected: boolean;
-    source: string;
+    project: ShaderProject | null;
     loading: boolean;
     error: string;
     playing: boolean;
@@ -15,7 +16,7 @@ interface ShaderStageProps {
 
 export function ShaderStage({
     selected,
-    source,
+    project,
     loading,
     error,
     playing,
@@ -24,9 +25,9 @@ export function ShaderStage({
 }: ShaderStageProps) {
     return (
         <div ref={stageRef} className="viewer-stage">
-            {selected && !loading && (
+            {selected && project && !loading && (
                 <ShaderCanvas
-                    source={source}
+                    project={project}
                     playing={playing}
                     onError={onRenderError}
                 />

@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import type { ShaderProject } from '../../types/shader';
 import { useFullscreen } from '../../hooks/useFullscreen';
 import { FullscreenButton } from '../molecules/FullscreenButton';
 import { PlaybackControls } from '../molecules/PlaybackControls';
@@ -7,7 +8,7 @@ import { ShaderStage } from './ShaderStage';
 
 interface ViewerPanelProps {
     selectedName: string;
-    source: string;
+    project: ShaderProject | null;
     loading: boolean;
     error: string;
     playing: boolean;
@@ -17,7 +18,7 @@ interface ViewerPanelProps {
 
 export function ViewerPanel({
     selectedName,
-    source,
+    project,
     loading,
     error,
     playing,
@@ -32,7 +33,7 @@ export function ViewerPanel({
             <ViewerHeading shaderName={selectedName} />
             <ShaderStage
                 selected={Boolean(selectedName)}
-                source={source}
+                project={project}
                 loading={loading}
                 error={error}
                 playing={playing}

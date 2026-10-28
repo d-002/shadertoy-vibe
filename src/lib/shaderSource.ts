@@ -15,6 +15,11 @@ uniform float iTimeDelta;
 uniform int iFrame;
 uniform vec4 iMouse;
 uniform vec4 iDate;
+uniform sampler2D iChannel0;
+uniform sampler2D iChannel1;
+uniform sampler2D iChannel2;
+uniform sampler2D iChannel3;
+uniform vec3 iChannelResolution[4];
 out vec4 _shaderColor;
 ${source}
 void main() { mainImage(_shaderColor, gl_FragCoord.xy); }

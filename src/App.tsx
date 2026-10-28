@@ -20,7 +20,7 @@ export default function App() {
                 />
                 <ViewerPanel
                     selectedName={viewer.selectedName}
-                    source={viewer.source}
+                    project={viewer.project}
                     loading={viewer.loading}
                     error={viewer.error}
                     playing={playback.playing}

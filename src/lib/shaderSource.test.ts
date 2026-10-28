@@ -9,6 +9,8 @@ describe('fragment shader wrapper', () => {
         expect(wrapped).toContain('#version 300 es');
         expect(wrapped).toContain('uniform vec3 iResolution;');
         expect(wrapped).toContain('uniform float iTime;');
+        expect(wrapped).toContain('uniform sampler2D iChannel0;');
+        expect(wrapped).toContain('uniform vec3 iChannelResolution[4];');
         expect(wrapped).toContain('mainImage(_shaderColor, gl_FragCoord.xy)');
     });
 });

@@ -4,14 +4,14 @@ import App from './App';
 
 vi.mock('./components/ShaderCanvas', () => ({
     ShaderCanvas: ({
-        source,
+        project,
         playing,
     }: {
-        source: string;
+        project: { passes: { source: string }[] };
         playing: boolean;
     }) => (
         <div data-testid="canvas-mock" data-playing={String(playing)}>
-            {source}
+            {project.passes[0]?.source}
         </div>
     ),
 }));
@@ -28,10 +28,22 @@ beforeEach(() => {
                         { id: 'other', name: 'other' },
                     ],
                 };
-            const shaderId = url.split('/').at(-1) ?? '';
+            const shaderId = url.split('/').at(-2) ?? '';
             return {
                 ok: true,
-                text: async () => `source for ${decodeURIComponent(shaderId)}`,
+                json: async () => ({
+                    id: decodeURIComponent(shaderId),
+                    passes: [
+                        {
+                            id: 'Image',
+                            file: 'main.frag',
+                            inputs: [],
+                            source: `source for ${decodeURIComponent(
+                                shaderId,
+                            )}`,
+                        },
+                    ],
+                }),
             };
         }),
     );

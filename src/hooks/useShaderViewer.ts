@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ShaderInfo } from '../types/shader';
+import type { ShaderInfo, ShaderProject } from '../types/shader';
 
 function errorMessage(error: unknown): string {
     return error instanceof Error ? error.message : String(error);
@@ -8,7 +8,7 @@ function errorMessage(error: unknown): string {
 export function useShaderViewer() {
     const [shaders, setShaders] = useState<ShaderInfo[]>([]);
     const [selectedId, setSelectedId] = useState('');
-    const [source, setSource] = useState('');
+    const [project, setProject] = useState<ShaderProject | null>(null);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(true);
 
@@ -32,7 +32,7 @@ export function useShaderViewer() {
 
     const loadSource = useCallback(async (id: string) => {
         if (!id) {
-            setSource('');
+            setProject(null);
             setLoading(false);
             return;
         }
@@ -40,12 +40,12 @@ export function useShaderViewer() {
         setLoading(true);
         try {
             const response = await fetch(
-                `/api/shaders/${encodeURIComponent(id)}`,
+                `/api/shaders/${encodeURIComponent(id)}/project`,
             );
             if (!response.ok) {
                 throw new Error(`Could not load ${id} (${response.status}).`);
             }
-            setSource(await response.text());
+            setProject((await response.json()) as ShaderProject);
             setError('');
         } catch (loadError) {
             setError(errorMessage(loadError));
@@ -88,7 +88,7 @@ export function useShaderViewer() {
         shaders,
         selectedId,
         selectedName,
-        source,
+        project,
         loading,
         error,
         setError,
