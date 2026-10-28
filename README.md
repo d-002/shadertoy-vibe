@@ -20,7 +20,7 @@ and `iDate` uniforms. Compile errors are shown in the viewer.
 The included `shaders/example-basic/` folder demonstrates a single-pass shader.
 `shaders/example-buffers/` demonstrates frame feedback, the keyboard texture,
 and the mouse uniform. Hold the mouse button over the preview to paint; press C
-to switch the brush color.
+to cycle the brush through red, green, and blue.
 
 ```glsl
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
@@ -32,9 +32,13 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 For multi-pass shaders, add a `shader.json` manifest beside the GLSL files.
 Declare buffer passes (`BufferA` through `BufferD`) before the final `Image`
 pass. Each pass binds up to four channels (`iChannel0`–`iChannel3`) to an
-earlier buffer or the built-in `Keyboard` texture. Set `"history": true` to read
-a buffer's previous-frame image for feedback; ordinary buffer links read the
-current frame. Shader files remain individual `.frag` files.
+earlier buffer or the built-in `Keyboard` texture. The optional
+`"history": true` flag is this viewer's manifest syntax for reading a buffer's
+previous-frame image (feedback); ordinary buffer links read the current frame.
+Shadertoy expresses feedback through buffer channel wiring rather than this
+manifest flag. Cubemap channels are not supported yet; channels currently bind
+2D buffers or the built-in keyboard texture. Shader files remain individual
+`.frag` files.
 
 ```json
 {

@@ -1,17 +1,44 @@
 {
     "passes": [
         {
+            "id": "BufferB",
+            "file": "buffer-b.frag",
+            "inputs": [
+                {
+                    "channel": 0,
+                    "source": "BufferB",
+                    "history": true
+                },
+                {
+                    "channel": 1,
+                    "source": "Keyboard"
+                }
+            ]
+        },
+        {
             "id": "BufferA",
             "file": "buffer-a.frag",
             "inputs": [
-                { "channel": 0, "source": "BufferA", "history": true },
-                { "channel": 1, "source": "Keyboard" }
+                {
+                    "channel": 0,
+                    "source": "BufferA",
+                    "history": true
+                },
+                {
+                    "channel": 1,
+                    "source": "BufferB"
+                }
             ]
         },
         {
             "id": "Image",
             "file": "image.frag",
-            "inputs": [{ "channel": 0, "source": "BufferA" }]
+            "inputs": [
+                {
+                    "channel": 0,
+                    "source": "BufferA"
+                }
+            ]
         }
     ]
 }
