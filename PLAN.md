@@ -26,4 +26,5 @@
 - [x] Document the workflow and initial shader format in `README.md`.
 - [x] Build the single-pass viewer and test setup.
 - [ ] Add buffer passes and interactive keyboard/mouse inputs.
+- [ ] Plan and implement deployment (for example, Cloudflare Pages); decide deployment details later.
 - [ ] Remove this temporary checkpoint when the project work is complete.
