@@ -4,6 +4,8 @@ A local Shadertoy-style shader viewer built with React and TypeScript. Shader
 code lives in local files in the documented layout; file editing is left to you,
 and there is no in-browser code editor.
 
+And if you couldn't tell yes this was entirely vibed with Codex.
+
 ## Local workflow
 
 Run `npm install`, then `npm run dev` and open the local URL printed by Vite
