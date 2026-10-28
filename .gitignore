@@ -1,4 +1,12 @@
+# Node
 node_modules/
+
+# Build
 dist/
+
+# Lint
 coverage/
-.DS_Store
+
+# Vim
+*.swp
+*~
