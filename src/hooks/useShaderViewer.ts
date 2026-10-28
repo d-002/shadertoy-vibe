@@ -69,13 +69,25 @@ export function useShaderViewer() {
             if (data.id === selectedId) void loadSource(data.id);
         };
 
+        const onAssetChanged = (data: { file: string }) => {
+            const usesAsset = project?.passes.some((pass) =>
+                pass.inputs.some(
+                    (input) =>
+                        input.source === 'Texture' && input.file === data.file,
+                ),
+            );
+            if (usesAsset) void loadSource(selectedId);
+        };
+
         import.meta.hot.on('shader:changed', onShaderChanged);
         import.meta.hot.on('shader:list-changed', loadShaders);
+        import.meta.hot.on('assets:changed', onAssetChanged);
         return () => {
             import.meta.hot?.off('shader:changed', onShaderChanged);
             import.meta.hot?.off('shader:list-changed', loadShaders);
+            import.meta.hot?.off('assets:changed', onAssetChanged);
         };
-    }, [selectedId, loadShaders, loadSource]);
+    }, [selectedId, project, loadShaders, loadSource]);
 
     const selectShader = useCallback((id: string) => {
         setSelectedId(id);

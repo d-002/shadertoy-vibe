@@ -10,6 +10,7 @@ import {
     createWebGLRenderer,
     type WebGLRenderer,
 } from '../utils/webglRenderer';
+import { loadShaderImages } from '../utils/shaderImages';
 
 interface ShaderCanvasProps {
     project: ShaderProject;
@@ -52,16 +53,11 @@ export function ShaderCanvas({ project, playing, onError }: ShaderCanvasProps) {
         const canvas = canvasRef.current;
         if (!canvas) return undefined;
 
-        let renderer: WebGLRenderer;
-        try {
-            renderer = createWebGLRenderer(canvas, project);
-            onError('');
-        } catch (error) {
-            onError(errorMessage(error));
-            return undefined;
-        }
+        let active = true;
+        let renderer: WebGLRenderer | undefined;
 
         const draw = (now: number) => {
+            if (!renderer) return;
             rafRef.current = 0;
             renderer.render(
                 now,
@@ -74,14 +70,25 @@ export function ShaderCanvas({ project, playing, onError }: ShaderCanvasProps) {
                 rafRef.current = requestAnimationFrame(draw);
             }
         };
-        drawRef.current = draw;
-        draw(performance.now());
+
+        void loadShaderImages(project)
+            .then((images) => {
+                if (!active) return;
+                renderer = createWebGLRenderer(canvas, project, images);
+                onError('');
+                drawRef.current = draw;
+                draw(performance.now());
+            })
+            .catch((error: unknown) => {
+                if (active) onError(errorMessage(error));
+            });
 
         return () => {
+            active = false;
             drawRef.current = null;
             cancelAnimationFrame(rafRef.current);
             rafRef.current = 0;
-            renderer.dispose();
+            renderer?.dispose();
         };
     }, [project, onError, clearPressed, keyboardStateRef]);
 

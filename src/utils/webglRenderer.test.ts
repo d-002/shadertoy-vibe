@@ -33,6 +33,7 @@ function createFakeContext() {
         RGBA8: 15,
         RGBA: 16,
         UNSIGNED_BYTE: 17,
+        UNPACK_FLIP_Y_WEBGL: 20,
         FRAMEBUFFER_COMPLETE: 18,
         TRIANGLES: 19,
         createShader: vi.fn((type: number) => ({ type, id: ++resourceId })),
@@ -63,6 +64,7 @@ function createFakeContext() {
             boundTextures.set(currentUnit, texture);
         }),
         texParameteri: vi.fn(),
+        pixelStorei: vi.fn(),
         texImage2D: vi.fn(),
         texSubImage2D: vi.fn(),
         createFramebuffer: vi.fn(
@@ -132,6 +134,55 @@ describe('WebGL renderer', () => {
         expect(() => createWebGLRenderer(canvas, project)).toThrow(
             'WebGL 2 is not available in this browser.',
         );
+    });
+
+    it('binds image textures and reports their dimensions', () => {
+        const { gl, draws } = createFakeContext();
+        const image = {
+            naturalWidth: 96,
+            naturalHeight: 64,
+        } as HTMLImageElement;
+        const imageProject: ShaderProject = {
+            id: 'image-input',
+            passes: [
+                {
+                    id: 'Image',
+                    file: 'main.frag',
+                    source: 'shader source',
+                    inputs: [
+                        { channel: 0, source: 'Texture', file: 'sample.jpg' },
+                    ],
+                },
+            ],
+        };
+        const renderer = createWebGLRenderer(
+            createCanvas(gl as unknown as WebGL2RenderingContext),
+            imageProject,
+            new Map([['sample.jpg', image]]),
+        );
+        const keyboard = {
+            down: new Set<number>(),
+            pressed: new Set<number>(),
+            toggled: new Set<number>(),
+        };
+        renderer.render(1000, [0, 0, 0, 0], false, keyboard);
+
+        expect(gl.texImage2D).toHaveBeenCalledWith(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            image,
+        );
+        expect(draws[0]?.textures.get(gl.TEXTURE0)).toBe(
+            gl.createTexture.mock.results[1]?.value,
+        );
+        expect(gl.uniform3fv).toHaveBeenCalledWith(
+            { name: 'iChannelResolution[0]' },
+            new Float32Array([96, 64, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+        );
+        renderer.dispose();
     });
 
     it('renders ordered passes with ping-pong feedback', () => {

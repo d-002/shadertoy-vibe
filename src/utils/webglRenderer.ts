@@ -48,6 +48,7 @@ export interface WebGLRenderer {
 export function createWebGLRenderer(
     canvas: HTMLCanvasElement,
     project: ShaderProject,
+    images: ReadonlyMap<string, HTMLImageElement> = new Map(),
 ): WebGLRenderer {
     const gl = canvas.getContext('webgl2', {
         antialias: false,
@@ -60,6 +61,7 @@ export function createWebGLRenderer(
     const passes = compilePasses(gl, project.passes);
     const buffers = new Map<BufferId, BufferState>();
     let keyboardTexture: WebGLTexture | null = null;
+    const imageTextures = new Map<string, InputTexture>();
     const usesKeyboard = project.passes.some((pass) =>
         pass.inputs.some((input) => input.source === 'Keyboard'),
     );
@@ -79,10 +81,51 @@ export function createWebGLRenderer(
             }
         }
         keyboardTexture = createKeyboardTexture(gl);
+        const imageFiles = new Set(
+            project.passes.flatMap((pass) =>
+                pass.inputs.flatMap((input) =>
+                    input.source === 'Texture' && input.file
+                        ? [input.file]
+                        : [],
+                ),
+            ),
+        );
+        for (const file of imageFiles) {
+            const image = images.get(file);
+            if (!image) throw new Error(`Image asset ${file} was not loaded.`);
+            const texture = gl.createTexture();
+            if (!texture)
+                throw new Error(`Could not create texture for ${file}.`);
+            try {
+                configureTexture(gl, texture);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+                try {
+                    gl.texImage2D(
+                        gl.TEXTURE_2D,
+                        0,
+                        gl.RGBA,
+                        gl.RGBA,
+                        gl.UNSIGNED_BYTE,
+                        image,
+                    );
+                } finally {
+                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 0);
+                }
+            } catch (error) {
+                gl.deleteTexture(texture);
+                throw error;
+            }
+            imageTextures.set(file, {
+                texture,
+                width: image.naturalWidth,
+                height: image.naturalHeight,
+            });
+        }
     } catch (error) {
         disposePasses(gl, passes);
         disposeBuffers(gl, buffers);
         if (keyboardTexture) gl.deleteTexture(keyboardTexture);
+        disposeImageTextures(gl, imageTextures);
         throw error;
     }
 
@@ -97,6 +140,7 @@ export function createWebGLRenderer(
         disposePasses(gl, passes);
         disposeBuffers(gl, buffers);
         gl.deleteTexture(keyboardTexture);
+        disposeImageTextures(gl, imageTextures);
         throw error;
     }
     let bufferWidth = initialSize.width;
@@ -140,6 +184,7 @@ export function createWebGLRenderer(
                     frame,
                     mouse,
                     keyboardTexture: keyboardTexture!,
+                    imageTextures,
                     buffers,
                     currentOutputs,
                 });
@@ -162,6 +207,7 @@ export function createWebGLRenderer(
             disposePasses(gl, passes);
             disposeBuffers(gl, buffers);
             gl.deleteTexture(keyboardTexture);
+            disposeImageTextures(gl, imageTextures);
         },
     };
 }
@@ -335,6 +381,7 @@ interface RenderPassOptions {
     frame: number;
     mouse: readonly [number, number, number, number];
     keyboardTexture: WebGLTexture;
+    imageTextures: Map<string, InputTexture>;
     buffers: Map<BufferId, BufferState>;
     currentOutputs: Map<BufferId, RenderTarget>;
 }
@@ -396,6 +443,14 @@ function inputTexture(
     input: ShaderInput,
     options: RenderPassOptions,
 ): InputTexture {
+    if (input.source === 'Texture') {
+        const image = input.file
+            ? options.imageTextures.get(input.file)
+            : undefined;
+        if (!image)
+            throw new Error(`Image asset ${input.file} was not loaded.`);
+        return image;
+    }
     if (input.source === 'Keyboard') {
         return {
             texture: options.keyboardTexture,
@@ -417,6 +472,14 @@ function inputTexture(
         width: options.width,
         height: options.height,
     };
+}
+
+function disposeImageTextures(
+    gl: WebGL2RenderingContext,
+    textures: Map<string, InputTexture>,
+) {
+    for (const { texture } of textures.values()) gl.deleteTexture(texture);
+    textures.clear();
 }
 
 function setDateUniform(
