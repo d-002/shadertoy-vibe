@@ -18,11 +18,10 @@ export function ShaderLibrary({
                 <span>LIBRARY</span>
                 <span className="count">{shaders.length}</span>
             </div>
-            {shaders.map((shader, index) => (
+            {shaders.map((shader) => (
                 <ShaderLibraryItem
                     key={shader.id}
                     shader={shader}
-                    index={index}
                     selected={selectedId === shader.id}
                     onSelect={onSelect}
                 />
