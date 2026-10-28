@@ -1,12 +1,15 @@
-import { useEffect, useRef, type PointerEvent } from 'react';
+import { useCallback, useEffect, useRef, type PointerEvent } from 'react';
 import type { ShaderProject } from '../types/shader';
+import { useKeyboardInput } from '../hooks/useKeyboardInput';
+import {
+    updateMouseUniform,
+    type MouseAction,
+    type MousePointerState,
+} from '../utils/mouseState';
 import {
     createWebGLRenderer,
     type WebGLRenderer,
 } from '../utils/webglRenderer';
-import { EMPTY_KEYBOARD_STATE } from '../utils/keyboardTexture';
-
-type MouseState = [number, number, number, number];
 
 interface ShaderCanvasProps {
     project: ShaderProject;
@@ -16,10 +19,23 @@ interface ShaderCanvasProps {
 
 export function ShaderCanvas({ project, playing, onError }: ShaderCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const mouseRef = useRef<MouseState>([0, 0, 0, 0]);
+    const mouseRef = useRef<[number, number, number, number]>([0, 0, 0, 0]);
+    const pointerRef = useRef<MousePointerState>({
+        down: false,
+        hasClick: false,
+        clickX: 0,
+        clickY: 0,
+    });
     const playingRef = useRef(playing);
     const drawRef = useRef<((now: number) => void) | null>(null);
     const rafRef = useRef(0);
+    const schedulePausedDraw = useCallback(() => {
+        if (!playingRef.current && drawRef.current && !rafRef.current) {
+            rafRef.current = requestAnimationFrame(drawRef.current);
+        }
+    }, []);
+    const { stateRef: keyboardStateRef, clearPressed } =
+        useKeyboardInput(schedulePausedDraw);
 
     useEffect(() => {
         playingRef.current = playing;
@@ -51,8 +67,9 @@ export function ShaderCanvas({ project, playing, onError }: ShaderCanvasProps) {
                 now,
                 mouseRef.current,
                 playingRef.current,
-                EMPTY_KEYBOARD_STATE,
+                keyboardStateRef.current,
             );
+            clearPressed();
             if (playingRef.current) {
                 rafRef.current = requestAnimationFrame(draw);
             }
@@ -66,16 +83,23 @@ export function ShaderCanvas({ project, playing, onError }: ShaderCanvasProps) {
             rafRef.current = 0;
             renderer.dispose();
         };
-    }, [project, onError]);
+    }, [project, onError, clearPressed, keyboardStateRef]);
 
     const updateMouse = (
         event: PointerEvent<HTMLCanvasElement>,
-        pressed: boolean,
+        action: MouseAction,
     ) => {
-        const rect = event.currentTarget.getBoundingClientRect();
-        const x = event.clientX - rect.left;
-        const y = rect.height - (event.clientY - rect.top);
-        mouseRef.current = [x, y, pressed ? x : 0, pressed ? y : 0];
+        const canvas = event.currentTarget;
+        mouseRef.current = updateMouseUniform(
+            pointerRef.current,
+            action,
+            event.clientX,
+            event.clientY,
+            canvas.getBoundingClientRect(),
+            canvas.width,
+            canvas.height,
+        );
+        schedulePausedDraw();
     };
 
     return (
@@ -83,10 +107,12 @@ export function ShaderCanvas({ project, playing, onError }: ShaderCanvasProps) {
             ref={canvasRef}
             className="shader-canvas"
             aria-label="Shader output"
-            onPointerMove={(event) => updateMouse(event, event.buttons !== 0)}
-            onPointerDown={(event) => updateMouse(event, true)}
-            onPointerUp={(event) => updateMouse(event, false)}
-            onPointerLeave={(event) => updateMouse(event, false)}
+            onPointerMove={(event) => updateMouse(event, 'move')}
+            onPointerDown={(event) => updateMouse(event, 'down')}
+            onPointerUp={(event) => updateMouse(event, 'up')}
+            onPointerLeave={(event) => {
+                if (pointerRef.current.down) updateMouse(event, 'up');
+            }}
         />
     );
 }
