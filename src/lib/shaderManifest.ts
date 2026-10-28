@@ -27,7 +27,7 @@ function parseInput(value: unknown, passId: string): ShaderInput {
         throw new Error(`Inputs for ${passId} must be objects.`);
     }
 
-    const { channel, source, history } = value;
+    const { channel, source, history, file } = value;
     if (
         !Number.isInteger(channel) ||
         Number(channel) < 0 ||
@@ -37,22 +37,39 @@ function parseInput(value: unknown, passId: string): ShaderInput {
             `Input channels for ${passId} must be integers from 0 to 3.`,
         );
     }
-    if (source !== 'Keyboard' && !isBufferId(source)) {
+    if (source !== 'Keyboard' && source !== 'Texture' && !isBufferId(source)) {
         throw new Error(
-            `Input source for ${passId} must be a buffer or Keyboard.`,
+            `Input source for ${passId} must be a buffer, Keyboard, ` +
+                'or Texture.',
         );
     }
     if (history !== undefined && typeof history !== 'boolean') {
         throw new Error(`Input history for ${passId} must be true or false.`);
     }
-    if (history && source === 'Keyboard') {
-        throw new Error('Keyboard inputs cannot use history.');
+    if (history && !isBufferId(source)) {
+        throw new Error('Only buffer inputs can use history.');
+    }
+    if (source === 'Texture') {
+        if (
+            typeof file !== 'string' ||
+            !/^[\w.-]+\.(png|jpe?g|webp)$/i.test(file) ||
+            file === '.' ||
+            file === '..'
+        ) {
+            throw new Error(
+                `Texture input for ${passId} must name an image file ` +
+                    `in assets/ (PNG, JPEG, or WebP).`,
+            );
+        }
+    } else if (file !== undefined) {
+        throw new Error(`Only Texture inputs can specify a file.`);
     }
 
     return {
         channel: Number(channel),
         source: source as ShaderInputSource,
         ...(history ? { history: true } : {}),
+        ...(source === 'Texture' ? { file: file as string } : {}),
     };
 }
 
@@ -110,7 +127,8 @@ export function parseShaderManifest(value: unknown): ShaderManifest {
     const positions = new Map(ids.map((id, index) => [id, index]));
     passes.forEach((pass, index) => {
         for (const input of pass.inputs) {
-            if (input.source === 'Keyboard') continue;
+            if (input.source === 'Keyboard' || input.source === 'Texture')
+                continue;
             const sourceIndex = positions.get(input.source);
             if (sourceIndex === undefined) {
                 throw new Error(

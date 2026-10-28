@@ -2,6 +2,45 @@ import { describe, expect, it } from 'vitest';
 import { parseShaderManifest } from './shaderManifest';
 
 describe('shader manifest', () => {
+    it('allows local image textures as channel inputs', () => {
+        const manifest = parseShaderManifest({
+            passes: [
+                {
+                    id: 'Image',
+                    file: 'main.frag',
+                    inputs: [
+                        { channel: 0, source: 'Texture', file: 'sample.jpg' },
+                    ],
+                },
+            ],
+        });
+        expect(manifest.passes[0]?.inputs[0]).toEqual({
+            channel: 0,
+            source: 'Texture',
+            file: 'sample.jpg',
+        });
+    });
+
+    it('rejects image paths outside the assets directory', () => {
+        expect(() =>
+            parseShaderManifest({
+                passes: [
+                    {
+                        id: 'Image',
+                        file: 'main.frag',
+                        inputs: [
+                            {
+                                channel: 0,
+                                source: 'Texture',
+                                file: '../private.png',
+                            },
+                        ],
+                    },
+                ],
+            }),
+        ).toThrow('must name an image file in assets/');
+    });
+
     it('allows history feedback and keyboard channel inputs', () => {
         const manifest = parseShaderManifest({
             passes: [
