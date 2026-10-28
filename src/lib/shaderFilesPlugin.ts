@@ -1,7 +1,11 @@
 import path from 'node:path';
 import type { ServerResponse } from 'node:http';
 import type { Connect, Plugin, ViteDevServer } from 'vite';
-import { discoverShaders, readShader } from './shaderFiles.ts';
+import {
+    discoverShaders,
+    readShader,
+    readShaderProject,
+} from './shaderFiles.ts';
 
 function errorCode(error: unknown): string | undefined {
     if (error instanceof Error && 'code' in error) {
@@ -60,7 +64,9 @@ export function shaderFilesPlugin(): Plugin {
                 return;
             }
 
-            const match = pathname.match(/^\/api\/shaders\/([^/]+)$/);
+            const match = pathname.match(
+                /^\/api\/shaders\/([^/]+)(\/project)?$/,
+            );
             if (!match) {
                 response.statusCode = 404;
                 response.end('Not found');
@@ -68,9 +74,15 @@ export function shaderFilesPlugin(): Plugin {
             }
 
             const id = decodeURIComponent(match[1]);
-            const shader = await readShader(shadersRoot, id);
+            if (match[2] === '/project') {
+                const project = await readShaderProject(shadersRoot, id);
+                response.setHeader('Content-Type', 'application/json');
+                response.end(JSON.stringify(project));
+                return;
+            }
+            const source = await readShader(shadersRoot, id);
             response.setHeader('Content-Type', 'text/plain; charset=utf-8');
-            response.end(shader);
+            response.end(source);
         } catch (error) {
             response.statusCode = errorCode(error) === 'ENOENT' ? 404 : 400;
             response.end(errorMessage(error));
@@ -83,14 +95,18 @@ export function shaderFilesPlugin(): Plugin {
         if (relative.startsWith('..') || path.isAbsolute(relative)) return;
 
         const [id, filename] = relative.split(path.sep);
-        if (filename === 'main.frag') {
+        if (filename === 'shader.json' || filename?.endsWith('.frag')) {
             server.ws.send({
                 type: 'custom',
                 event: 'shader:changed',
                 data: { id },
             });
         }
-        if (filename === undefined || filename === 'main.frag') {
+        if (
+            filename === undefined ||
+            filename === 'main.frag' ||
+            filename === 'shader.json'
+        ) {
             server.ws.send({ type: 'custom', event: 'shader:list-changed' });
         }
     }
