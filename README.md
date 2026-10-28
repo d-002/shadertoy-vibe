@@ -18,9 +18,11 @@ The viewer supplies `iResolution`, `iTime`, `iTimeDelta`, `iFrame`, `iMouse`,
 and `iDate` uniforms. Compile errors are shown in the viewer.
 
 The included `shaders/example-basic/` folder demonstrates a single-pass shader.
+`shaders/example-image/` demonstrates loading an image from `assets/`, and
 `shaders/example-buffers/` demonstrates frame feedback, the keyboard texture,
 and the mouse uniform. Hold the mouse button over the preview to paint; press C
-to cycle the brush through red, green, and blue.
+to cycle the brush through red, green, and blue. The preview timer shows shader
+time and its reset button restarts the shader.
 
 ```glsl
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {

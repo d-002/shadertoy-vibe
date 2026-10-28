@@ -44,6 +44,9 @@ planning.**
 - [x] Add an example that demonstrates buffer feedback and keyboard/mouse input.
 - [x] Add local PNG, JPEG, and WebP channel inputs and document the asset
       layout.
+- [x] Show shader API validation details in the viewer.
+- [x] Add a preview timer with shader reset controls.
+- [x] Add an image input example using the sample asset.
 - [ ] Plan and implement deployment (for example, Cloudflare Pages); decide
       deployment details later.
 - [ ] Remove this temporary checkpoint when the project work is complete.

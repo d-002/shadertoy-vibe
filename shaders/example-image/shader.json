@@ -1,0 +1,11 @@
+{
+    "passes": [
+        {
+            "id": "Image",
+            "file": "main.frag",
+            "inputs": [
+                { "channel": 0, "source": "Texture", "file": "sample.jpg" }
+            ]
+        }
+    ]
+}
