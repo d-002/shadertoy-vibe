@@ -11,7 +11,9 @@
         "lint": "eslint .",
         "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,html,md}\"",
         "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,html,md}\"",
-        "check": "npm run lint && npm run format:check && npm test && npm run build"
+        "check": "npm run lint && npm run format:check && npm test && npm run build",
+        "format:frag": "prettier --plugin prettier-plugin-glsl --write \"shaders/**/*.frag\"",
+        "format:frag:check": "prettier --plugin prettier-plugin-glsl --check \"shaders/**/*.frag\""
     },
     "dependencies": {
         "react": "latest",
@@ -32,6 +34,7 @@
         "globals": "^17.13.0",
         "jsdom": "latest",
         "prettier": "^3.9.10",
+        "prettier-plugin-glsl": "^0.3.1",
         "typescript": "^6.0.3",
         "typescript-eslint": "^8.72.1",
         "vite": "latest",

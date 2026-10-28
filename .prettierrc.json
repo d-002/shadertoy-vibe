@@ -4,5 +4,14 @@
     "semi": true,
     "trailingComma": "all",
     "proseWrap": "always",
-    "tabWidth": 4
+    "tabWidth": 4,
+    "plugins": ["prettier-plugin-glsl"],
+    "overrides": [
+        {
+            "files": "*.frag",
+            "options": {
+                "parser": "glsl-parser"
+            }
+        }
+    ]
 }

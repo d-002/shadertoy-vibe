@@ -1,7 +1,8 @@
-void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-    float colorIndex = iFrame == 0
-        ? 0.0
-        : texture(iChannel0, vec2(0.5) / iResolution.xy).r;
+void mainImage(out vec4 fragColor, vec2 fragCoord) {
+    float colorIndex =
+        iFrame == 0
+            ? 0.0
+            : texture(iChannel0, vec2(0.5) / iResolution.xy).r;
     float cPressed = texelFetch(iChannel1, ivec2(67, 1), 0).r;
 
     if (cPressed > 0.5) {

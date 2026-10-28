@@ -25,7 +25,7 @@ to cycle the brush through red, green, and blue. The preview timer shows shader
 time and its reset button restarts the shader.
 
 ```glsl
-void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+void mainImage(out vec4 fragColor, vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
     fragColor = vec4(uv, 0.5 + 0.5 * sin(iTime), 1.0);
 }
@@ -78,7 +78,9 @@ negative after release.
   Hooks checks, and an 80-column maximum line check.
 - `npm run format` formats supported source, config, and Markdown files with
   Prettier at an 80-column print width.
-- `npm run format:check` checks that formatting is applied.
+- `npm run format:check` checks formatting for the app and docs.
+- `npm run format:frag` formats all `.frag` files under `shaders/`.
+- `npm run format:frag:check` checks all shader files for formatting.
 - `npm test` runs the Vitest suite.
 - `npm run build` typechecks the TypeScript and creates the production build.
 - `npm run check` runs lint, formatting check, tests, and production build.
