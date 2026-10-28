@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { readFile } from 'node:fs/promises';
 import type { ServerResponse } from 'node:http';
 import type { Connect, Plugin, ViteDevServer } from 'vite';
 import {
@@ -21,12 +22,15 @@ function errorMessage(error: unknown): string {
 export function shaderFilesPlugin(): Plugin {
     let server: ViteDevServer | undefined;
     let shadersRoot = '';
+    let assetsRoot = '';
 
     return {
         name: 'local-shader-files',
         configureServer(devServer) {
             server = devServer;
             shadersRoot = path.resolve(devServer.config.root, 'shaders');
+            assetsRoot = path.resolve(devServer.config.root, 'assets');
+            devServer.watcher.add(assetsRoot);
             devServer.watcher.add(shadersRoot);
             devServer.watcher.on('change', onShaderChange);
             devServer.watcher.on('add', onShaderChange);
@@ -50,12 +54,20 @@ export function shaderFilesPlugin(): Plugin {
     ) {
         const pathname = new URL(request.url ?? '/', 'http://localhost')
             .pathname;
-        if (request.method !== 'GET' || !pathname.startsWith('/api/shaders')) {
+        if (
+            request.method !== 'GET' ||
+            (!pathname.startsWith('/api/shaders') &&
+                !pathname.startsWith('/api/assets/'))
+        ) {
             next();
             return;
         }
 
         try {
+            if (pathname.startsWith('/api/assets/')) {
+                await handleAssetRequest(pathname, response);
+                return;
+            }
             if (pathname === '/api/shaders') {
                 response.setHeader('Content-Type', 'application/json');
                 response.end(
@@ -89,8 +101,47 @@ export function shaderFilesPlugin(): Plugin {
         }
     }
 
+    async function handleAssetRequest(
+        pathname: string,
+        response: ServerResponse,
+    ) {
+        const match = pathname.match(/^\/api\/assets\/([^/]+)$/);
+        const filename = match ? decodeURIComponent(match[1]) : '';
+        if (!/^[\w.-]+\.(png|jpe?g|webp)$/i.test(filename)) {
+            response.statusCode = 404;
+            response.end('Unsupported or invalid image asset.');
+            return;
+        }
+        const mimeTypes: Record<string, string> = {
+            png: 'image/png',
+            jpg: 'image/jpeg',
+            jpeg: 'image/jpeg',
+            webp: 'image/webp',
+        };
+        const extension = path.extname(filename).slice(1).toLowerCase();
+        const contents = await readFile(path.join(assetsRoot, filename));
+        response.setHeader('Content-Type', mimeTypes[extension]!);
+        response.setHeader('Cache-Control', 'no-store');
+        response.end(contents);
+    }
+
     function onShaderChange(file: string) {
         if (!server) return;
+        const assetRelative = path.relative(assetsRoot, file);
+        if (
+            !assetRelative.startsWith('..') &&
+            !path.isAbsolute(assetRelative)
+        ) {
+            const assetName = path.basename(file);
+            if (/^[\w.-]+\.(png|jpe?g|webp)$/i.test(assetName)) {
+                server.ws.send({
+                    type: 'custom',
+                    event: 'assets:changed',
+                    data: { file: assetName },
+                });
+            }
+            return;
+        }
         const relative = path.relative(shadersRoot, file);
         if (relative.startsWith('..') || path.isAbsolute(relative)) return;
 
