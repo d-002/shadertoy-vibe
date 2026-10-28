@@ -1,12 +1,22 @@
-import { useEffect, useRef } from 'react';
-import { createWebGLRenderer } from './utils/webglRenderer.js';
+import { useEffect, useRef, type PointerEvent } from 'react';
+import {
+    createWebGLRenderer,
+    type WebGLRenderer,
+} from '../utils/webglRenderer';
 
-export function ShaderCanvas({ source, playing, onError }) {
-    const canvasRef = useRef(null);
-    const mouseRef = useRef([0, 0, 0, 0]);
+type MouseState = [number, number, number, number];
+
+interface ShaderCanvasProps {
+    source: string;
+    playing: boolean;
+    onError: (message: string) => void;
+}
+
+export function ShaderCanvas({ source, playing, onError }: ShaderCanvasProps) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const mouseRef = useRef<MouseState>([0, 0, 0, 0]);
     const playingRef = useRef(playing);
-    const rendererRef = useRef(null);
-    const drawRef = useRef(null);
+    const drawRef = useRef<((now: number) => void) | null>(null);
     const rafRef = useRef(0);
 
     useEffect(() => {
@@ -22,17 +32,18 @@ export function ShaderCanvas({ source, playing, onError }) {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        let renderer;
+        if (!canvas) return undefined;
+
+        let renderer: WebGLRenderer;
         try {
             renderer = createWebGLRenderer(canvas, source);
-            rendererRef.current = renderer;
             onError('');
         } catch (error) {
-            onError(error.message);
+            onError(errorMessage(error));
             return undefined;
         }
 
-        const draw = (now) => {
+        const draw = (now: number) => {
             rafRef.current = 0;
             renderer.render(now, mouseRef.current, playingRef.current);
             if (playingRef.current) {
@@ -44,22 +55,28 @@ export function ShaderCanvas({ source, playing, onError }) {
 
         return () => {
             drawRef.current = null;
-            rendererRef.current = null;
             cancelAnimationFrame(rafRef.current);
             rafRef.current = 0;
             renderer.dispose();
         };
     }, [source, onError]);
 
-    const updateMouse = (event, pressed) => {
+    const updateMouse = (
+        event: PointerEvent<HTMLCanvasElement>,
+        pressed: boolean,
+    ) => {
         const rect = event.currentTarget.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = rect.height - (event.clientY - rect.top);
         mouseRef.current = [x, y, pressed ? x : 0, pressed ? y : 0];
+        schedulePausedDraw();
+    };
+
+    function schedulePausedDraw() {
         if (!playingRef.current && drawRef.current && !rafRef.current) {
             rafRef.current = requestAnimationFrame(drawRef.current);
         }
-    };
+    }
 
     return (
         <canvas
@@ -72,4 +89,8 @@ export function ShaderCanvas({ source, playing, onError }) {
             onPointerLeave={(event) => updateMouse(event, false)}
         />
     );
+}
+
+function errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
 }

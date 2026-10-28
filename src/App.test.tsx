@@ -1,9 +1,15 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import App from './App.jsx';
+import App from './App';
 
-vi.mock('./ShaderCanvas.jsx', () => ({
-    ShaderCanvas: ({ source, playing }) => (
+vi.mock('./components/ShaderCanvas', () => ({
+    ShaderCanvas: ({
+        source,
+        playing,
+    }: {
+        source: string;
+        playing: boolean;
+    }) => (
         <div data-testid="canvas-mock" data-playing={String(playing)}>
             {source}
         </div>
@@ -13,7 +19,7 @@ vi.mock('./ShaderCanvas.jsx', () => ({
 beforeEach(() => {
     vi.stubGlobal(
         'fetch',
-        vi.fn(async (url) => {
+        vi.fn(async (url: string) => {
             if (url === '/api/shaders')
                 return {
                     ok: true,
@@ -22,10 +28,10 @@ beforeEach(() => {
                         { id: 'other', name: 'other' },
                     ],
                 };
+            const shaderId = url.split('/').at(-1) ?? '';
             return {
                 ok: true,
-                text: async () =>
-                    `source for ${decodeURIComponent(url.split('/').at(-1))}`,
+                text: async () => `source for ${decodeURIComponent(shaderId)}`,
             };
         }),
     );

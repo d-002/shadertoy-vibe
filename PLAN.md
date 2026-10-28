@@ -36,6 +36,8 @@
 - [x] Initialize Git repository.
 - [x] Document the workflow and initial shader format in `README.md`.
 - [x] Build the single-pass viewer and test setup.
+- [x] Split the viewer UI into components and migrate application source to
+      TypeScript.
 - [ ] Add buffer passes and interactive keyboard/mouse inputs.
 - [ ] Plan and implement deployment (for example, Cloudflare Pages); decide
       deployment details later.

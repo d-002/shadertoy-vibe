@@ -1,12 +1,12 @@
 export const vertexSource = `#version 300 es
 precision highp float;
 const vec2 positions[3] = vec2[3](
-  vec2(-1.0, -1.0), vec2(3.0, -1.0), vec2(-1.0, 3.0)
+    vec2(-1.0, -1.0), vec2(3.0, -1.0), vec2(-1.0, 3.0)
 );
 void main() { gl_Position = vec4(positions[gl_VertexID], 0.0, 1.0); }
 `;
 
-export function wrapFragmentSource(source) {
+export function wrapFragmentSource(source: string): string {
     return `#version 300 es
 precision highp float;
 uniform vec3 iResolution;
@@ -21,9 +21,12 @@ void main() { mainImage(_shaderColor, gl_FragCoord.xy); }
 `;
 }
 
-export function compileProgram(gl, source) {
+export function compileProgram(
+    gl: WebGL2RenderingContext,
+    source: string,
+): WebGLProgram {
     const vertex = compileShader(gl, gl.VERTEX_SHADER, vertexSource);
-    let fragment;
+    let fragment: WebGLShader;
     try {
         fragment = compileShader(
             gl,
@@ -34,7 +37,13 @@ export function compileProgram(gl, source) {
         gl.deleteShader(vertex);
         throw error;
     }
+
     const program = gl.createProgram();
+    if (!program) {
+        gl.deleteShader(vertex);
+        gl.deleteShader(fragment);
+        throw new Error('Could not create a WebGL program.');
+    }
     gl.attachShader(program, vertex);
     gl.attachShader(program, fragment);
     gl.linkProgram(program);
@@ -50,8 +59,13 @@ export function compileProgram(gl, source) {
     return program;
 }
 
-function compileShader(gl, type, source) {
+function compileShader(
+    gl: WebGL2RenderingContext,
+    type: number,
+    source: string,
+): WebGLShader {
     const shader = gl.createShader(type);
+    if (!shader) throw new Error('Could not create a WebGL shader.');
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {

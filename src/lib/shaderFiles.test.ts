@@ -2,9 +2,9 @@ import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { discoverShaders, readShader } from './shaderFiles.js';
+import { discoverShaders, readShader } from './shaderFiles';
 
-let temp;
+let temp: string | undefined;
 afterEach(async () => {
     if (temp) await rm(temp, { recursive: true, force: true });
     temp = undefined;

@@ -1,12 +1,12 @@
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { shaderFilesPlugin } from './src/lib/shaderFiles.js';
+import { defineConfig } from 'vitest/config';
+import { shaderFilesPlugin } from './src/lib/shaderFilesPlugin.ts';
 
 export default defineConfig({
     plugins: [react(), shaderFilesPlugin()],
     test: {
         environment: 'jsdom',
-        setupFiles: ['./src/test/setup.js'],
+        setupFiles: ['./src/test/setup.ts'],
         restoreMocks: true,
     },
 });

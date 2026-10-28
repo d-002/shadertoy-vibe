@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { wrapFragmentSource } from './shaderSource.js';
+import { wrapFragmentSource } from './shaderSource';
 
 describe('fragment shader wrapper', () => {
     it('adds uniforms and calls mainImage at fragment coordinates', () => {

@@ -1,8 +1,8 @@
 # Local Shader Viewer
 
-A local Shadertoy-style shader viewer. Shader code lives in local files in the
-documented layout; file editing is left to you, and there is no in-browser code
-editor.
+A local Shadertoy-style shader viewer built with React and TypeScript. Shader
+code lives in local files in the documented layout; file editing is left to you,
+and there is no in-browser code editor.
 
 ## Local workflow
 
@@ -50,11 +50,11 @@ interactive inputs are planned follow-up features.
 
 ## Project checks
 
-- `npm run lint` runs ESLint's recommended JavaScript rules, React Hooks checks,
-  and an 80-column maximum line check.
+- `npm run lint` runs ESLint's recommended JavaScript/TypeScript rules and React
+  Hooks checks, and an 80-column maximum line check.
 - `npm run format` formats supported source, config, and Markdown files with
   Prettier at an 80-column print width.
 - `npm run format:check` checks that formatting is applied.
 - `npm test` runs the Vitest suite.
-- `npm run build` creates the production frontend build.
+- `npm run build` typechecks the TypeScript and creates the production build.
 - `npm run check` runs lint, formatting check, tests, and production build.
