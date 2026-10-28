@@ -90,7 +90,9 @@ export default function App() {
           {shaders.map((shader, index) => (
             <button
               key={shader.id}
-              className={`shader-item ${selected === shader.id ? 'active' : ''}`}
+              className={
+                selected === shader.id ? 'shader-item active' : 'shader-item'
+              }
               onClick={() => setSelected(shader.id)}
             >
               <span className="shader-icon">{index === 0 ? '◈' : '◇'}</span>

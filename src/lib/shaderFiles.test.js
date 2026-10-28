@@ -11,7 +11,7 @@ afterEach(async () => {
 });
 
 describe('shader file discovery', () => {
-  it('returns shader folders with main.frag in stable alphabetical order', async () => {
+  it('lists shader folders with main.frag in alphabetical order', async () => {
     temp = await mkdtemp(path.join(os.tmpdir(), 'shader-viewer-'));
     await mkdir(path.join(temp, 'zeta'));
     await mkdir(path.join(temp, 'alpha'));
@@ -30,7 +30,7 @@ describe('shader file discovery', () => {
     ]);
   });
 
-  it('returns an empty list when the shader directory does not exist', async () => {
+  it('returns empty when the shader directory is absent', async () => {
     expect(await discoverShaders('/path/that/does/not/exist')).toEqual([]);
   });
 

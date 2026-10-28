@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@testing-library/jest-dom": "latest",
     "@testing-library/react": "latest",
     "@vitejs/plugin-react": "latest",

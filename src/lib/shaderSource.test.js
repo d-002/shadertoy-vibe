@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { wrapFragmentSource } from './shaderSource.js';
 
 describe('fragment shader wrapper', () => {
-  it('adds Shadertoy uniforms and invokes mainImage at the fragment coordinate', () => {
+  it('adds uniforms and calls mainImage at fragment coordinates', () => {
     const wrapped = wrapFragmentSource(
       'void mainImage(out vec4 c, in vec2 p) { c = vec4(1.0); }',
     );

@@ -1,5 +1,6 @@
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
+import stylistic from '@stylistic/eslint-plugin';
 import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 
@@ -25,7 +26,6 @@ export default [
     rules: {
       // Async fetch effects update UI state after their requests resolve.
       'react-hooks/set-state-in-effect': 'off',
-      'max-len': ['error', { code: 80, tabWidth: 2, ignoreUrls: true }],
       'no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
@@ -33,4 +33,14 @@ export default [
     },
   },
   prettier,
+  {
+    files: ['**/*.{js,jsx}'],
+    plugins: { '@stylistic': stylistic },
+    rules: {
+      '@stylistic/max-len': [
+        'error',
+        { code: 80, tabWidth: 2, ignoreUrls: true },
+      ],
+    },
+  },
 ];
