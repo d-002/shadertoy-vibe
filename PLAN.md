@@ -1,6 +1,7 @@
 # Project checkpoint
 
-**You are here: local viewer and buffer/input support are complete; next is deployment planning.**
+**You are here: local image texture inputs are complete; next is deployment
+planning.**
 
 ## Agreed direction
 
@@ -24,9 +25,10 @@
   viewer uniforms include resolution, time, frame, mouse and date.
 - Optional `shader.json` lists passes in render order. `BufferA`–`BufferD` are
   buffer pass IDs, `Image` is the final pass, and each pass has up to four
-  inputs mapped to `iChannel0`–`iChannel3`. Buffers can be sampled from the
-  previous frame for feedback. Mouse is a uniform; keyboard state is exposed as
-  a Shadertoy-style texture.
+  inputs mapped to `iChannel0`–`iChannel3`. Inputs can reference buffers, the
+  keyboard texture, or local images in `assets/`. Buffers can be sampled from
+  the previous frame for feedback. Mouse is a uniform; keyboard state is exposed
+  as a Shadertoy-style texture.
 - Source files remain the editing surface; JSON only describes pass/input
   wiring.
 
@@ -40,6 +42,8 @@
       TypeScript.
 - [x] Add buffer passes and interactive keyboard/mouse inputs.
 - [x] Add an example that demonstrates buffer feedback and keyboard/mouse input.
+- [x] Add local PNG, JPEG, and WebP channel inputs and document the asset
+      layout.
 - [ ] Plan and implement deployment (for example, Cloudflare Pages); decide
       deployment details later.
 - [ ] Remove this temporary checkpoint when the project work is complete.

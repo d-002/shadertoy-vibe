@@ -32,13 +32,16 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 For multi-pass shaders, add a `shader.json` manifest beside the GLSL files.
 Declare buffer passes (`BufferA` through `BufferD`) before the final `Image`
 pass. Each pass binds up to four channels (`iChannel0`–`iChannel3`) to an
-earlier buffer or the built-in `Keyboard` texture. The optional
-`"history": true` flag is this viewer's manifest syntax for reading a buffer's
-previous-frame image (feedback); ordinary buffer links read the current frame.
-Shadertoy expresses feedback through buffer channel wiring rather than this
-manifest flag. Cubemap channels are not supported yet; channels currently bind
-2D buffers or the built-in keyboard texture. Shader files remain individual
-`.frag` files.
+earlier buffer, the built-in `Keyboard` texture, or an image `Texture`. To use
+an image, put a PNG, JPEG, or WebP file directly in `assets/`, then reference
+its filename in the input manifest. For example,
+`"source": "Texture", "file": "sample.jpg"` binds `assets/sample.jpg` to that
+channel. The optional `"history": true` flag is this viewer's manifest syntax
+for reading a buffer's previous-frame image (feedback); ordinary buffer links
+read the current frame. Shadertoy expresses feedback through buffer channel
+wiring rather than this manifest flag. Image textures are loaded as 2D channels
+and report their dimensions through `iChannelResolution`; cubemap channels are
+not supported yet. Shader files remain individual `.frag` files.
 
 ```json
 {
