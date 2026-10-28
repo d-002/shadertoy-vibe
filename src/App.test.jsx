@@ -3,14 +3,32 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App.jsx';
 
 vi.mock('./ShaderCanvas.jsx', () => ({
-  ShaderCanvas: ({ source, playing }) => <div data-testid="canvas-mock" data-playing={String(playing)}>{source}</div>,
+  ShaderCanvas: ({ source, playing }) => (
+    <div data-testid="canvas-mock" data-playing={String(playing)}>
+      {source}
+    </div>
+  ),
 }));
 
 beforeEach(() => {
-  vi.stubGlobal('fetch', vi.fn(async (url) => {
-    if (url === '/api/shaders') return { ok: true, json: async () => [{ id: 'example', name: 'example' }, { id: 'other', name: 'other' }] };
-    return { ok: true, text: async () => `source for ${decodeURIComponent(url.split('/').at(-1))}` };
-  }));
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (url) => {
+      if (url === '/api/shaders')
+        return {
+          ok: true,
+          json: async () => [
+            { id: 'example', name: 'example' },
+            { id: 'other', name: 'other' },
+          ],
+        };
+      return {
+        ok: true,
+        text: async () =>
+          `source for ${decodeURIComponent(url.split('/').at(-1))}`,
+      };
+    }),
+  );
 });
 
 describe('viewer controls', () => {
@@ -26,6 +44,8 @@ describe('viewer controls', () => {
     render(<App />);
     await screen.findByText('source for example');
     fireEvent.click(screen.getByRole('button', { name: /other/ }));
-    await waitFor(() => expect(screen.getByText('source for other')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByText('source for other')).toBeInTheDocument(),
+    );
   });
 });

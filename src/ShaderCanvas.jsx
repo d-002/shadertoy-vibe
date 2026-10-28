@@ -10,7 +10,8 @@ export function ShaderCanvas({ source, playing, onError }) {
 
   useEffect(() => {
     playingRef.current = playing;
-    if (playing && drawRef.current && !rafRef.current) rafRef.current = requestAnimationFrame(drawRef.current);
+    if (playing && drawRef.current && !rafRef.current)
+      rafRef.current = requestAnimationFrame(drawRef.current);
     if (!playing && rafRef.current) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = 0;
@@ -35,7 +36,9 @@ export function ShaderCanvas({ source, playing, onError }) {
     }
 
     const uniforms = Object.fromEntries(
-      ['iResolution', 'iTime', 'iTimeDelta', 'iFrame', 'iMouse', 'iDate'].map((name) => [name, gl.getUniformLocation(program, name)]),
+      ['iResolution', 'iTime', 'iTimeDelta', 'iFrame', 'iMouse', 'iDate'].map(
+        (name) => [name, gl.getUniformLocation(program, name)],
+      ),
     );
     let frame = 0;
     let elapsed = 0;
@@ -54,13 +57,23 @@ export function ShaderCanvas({ source, playing, onError }) {
       gl.useProgram(program);
       gl.uniform3f(uniforms.iResolution, width, height, 1);
       gl.uniform1f(uniforms.iTime, elapsed);
-      gl.uniform1f(uniforms.iTimeDelta, previous ? Math.min((now - previous) / 1000, 0.1) : 0);
+      gl.uniform1f(
+        uniforms.iTimeDelta,
+        previous ? Math.min((now - previous) / 1000, 0.1) : 0,
+      );
       gl.uniform1i(uniforms.iFrame, frame++);
       gl.uniform4f(uniforms.iMouse, ...mouseRef.current);
       const date = new Date();
-      gl.uniform4f(uniforms.iDate, date.getFullYear(), date.getMonth() + 1, date.getDate(), date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds());
+      gl.uniform4f(
+        uniforms.iDate,
+        date.getFullYear(),
+        date.getMonth() + 1,
+        date.getDate(),
+        date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds(),
+      );
       gl.drawArrays(gl.TRIANGLES, 0, 3);
-      if (previous && playingRef.current) elapsed += Math.min((now - previous) / 1000, 0.1);
+      if (previous && playingRef.current)
+        elapsed += Math.min((now - previous) / 1000, 0.1);
       previous = now;
       if (playingRef.current) rafRef.current = requestAnimationFrame(draw);
     };
@@ -79,7 +92,8 @@ export function ShaderCanvas({ source, playing, onError }) {
     const x = event.clientX - rect.left;
     const y = rect.height - (event.clientY - rect.top);
     mouseRef.current = [x, y, pressed ? x : 0, pressed ? y : 0];
-    if (!playingRef.current && drawRef.current && !rafRef.current) rafRef.current = requestAnimationFrame(drawRef.current);
+    if (!playingRef.current && drawRef.current && !rafRef.current)
+      rafRef.current = requestAnimationFrame(drawRef.current);
   };
 
   return (

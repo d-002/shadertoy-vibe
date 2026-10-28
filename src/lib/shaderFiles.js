@@ -11,11 +11,14 @@ export async function discoverShaders(root) {
   }
 
   const shaders = [];
-  for (const entry of entries.filter((item) => item.isDirectory()).sort((a, b) => a.name.localeCompare(b.name))) {
+  for (const entry of entries
+    .filter((item) => item.isDirectory())
+    .sort((a, b) => a.name.localeCompare(b.name))) {
     const folder = path.join(root, entry.name);
     try {
       const shaderStat = await stat(path.join(folder, 'main.frag'));
-      if (shaderStat.isFile()) shaders.push({ id: entry.name, name: entry.name });
+      if (shaderStat.isFile())
+        shaders.push({ id: entry.name, name: entry.name });
     } catch (error) {
       if (error.code !== 'ENOENT') throw error;
     }
@@ -49,7 +52,8 @@ export function shaderFilesPlugin() {
 
       devServer.middlewares.use(async (req, res, next) => {
         const pathname = new URL(req.url ?? '/', 'http://localhost').pathname;
-        if (req.method !== 'GET' || !pathname.startsWith('/api/shaders')) return next();
+        if (req.method !== 'GET' || !pathname.startsWith('/api/shaders'))
+          return next();
         try {
           if (pathname === '/api/shaders') {
             res.setHeader('Content-Type', 'application/json');
@@ -78,7 +82,8 @@ export function shaderFilesPlugin() {
     const relative = path.relative(shadersRoot, file);
     if (relative.startsWith('..') || path.isAbsolute(relative)) return;
     const [id, filename] = relative.split(path.sep);
-    if (filename === 'main.frag') server.ws.send({ type: 'custom', event: 'shader:changed', data: { id } });
+    if (filename === 'main.frag')
+      server.ws.send({ type: 'custom', event: 'shader:changed', data: { id } });
     if (filename === undefined || filename === 'main.frag') {
       server.ws.send({ type: 'custom', event: 'shader:list-changed' });
     }

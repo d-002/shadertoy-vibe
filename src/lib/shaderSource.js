@@ -23,7 +23,11 @@ export function compileProgram(gl, source) {
   const vertex = compileShader(gl, gl.VERTEX_SHADER, vertexSource);
   let fragment;
   try {
-    fragment = compileShader(gl, gl.FRAGMENT_SHADER, wrapFragmentSource(source));
+    fragment = compileShader(
+      gl,
+      gl.FRAGMENT_SHADER,
+      wrapFragmentSource(source),
+    );
   } catch (error) {
     gl.deleteShader(vertex);
     throw error;
@@ -35,7 +39,8 @@ export function compileProgram(gl, source) {
   gl.deleteShader(vertex);
   gl.deleteShader(fragment);
   if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const message = gl.getProgramInfoLog(program) || 'Shader program could not be linked.';
+    const message =
+      gl.getProgramInfoLog(program) || 'Shader program could not be linked.';
     gl.deleteProgram(program);
     throw new Error(message);
   }
@@ -47,7 +52,8 @@ function compileShader(gl, type, source) {
   gl.shaderSource(shader, source);
   gl.compileShader(shader);
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const message = gl.getShaderInfoLog(shader) || 'Shader could not be compiled.';
+    const message =
+      gl.getShaderInfoLog(shader) || 'Shader could not be compiled.';
     gl.deleteShader(shader);
     throw new Error(message);
   }
