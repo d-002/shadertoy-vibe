@@ -1,0 +1,17 @@
+{
+    "passes": [
+        {
+            "id": "BufferA",
+            "file": "buffer-a.frag",
+            "inputs": [
+                { "channel": 0, "source": "BufferA", "history": true },
+                { "channel": 1, "source": "Keyboard" }
+            ]
+        },
+        {
+            "id": "Image",
+            "file": "image.frag",
+            "inputs": [{ "channel": 0, "source": "BufferA" }]
+        }
+    ]
+}

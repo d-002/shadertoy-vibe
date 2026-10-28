@@ -17,6 +17,11 @@ Shadertoy-style `mainImage(out vec4 fragColor, in vec2 fragCoord)` entry point.
 The viewer supplies `iResolution`, `iTime`, `iTimeDelta`, `iFrame`, `iMouse`,
 and `iDate` uniforms. Compile errors are shown in the viewer.
 
+The included `shaders/example-basic/` folder demonstrates a single-pass shader.
+`shaders/example-buffers/` demonstrates frame feedback, the keyboard texture,
+and the mouse uniform. Hold the mouse button over the preview to paint; press C
+to switch the brush color.
+
 ```glsl
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     vec2 uv = fragCoord / iResolution.xy;
@@ -25,17 +30,23 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 ```
 
 For multi-pass shaders, add a `shader.json` manifest beside the GLSL files.
-Declare passes in render order, using `BufferA` through `BufferD` for buffer IDs
-and `Image` for the final output. Each pass can bind up to four inputs
-(`iChannel0`–`iChannel3`) to declared buffers; buffer inputs can read the prior
-frame for feedback. The viewer also provides mouse state and a Shadertoy-style
-keyboard texture. The manifest is configuration only: all shader code remains in
-`.frag` files.
+Declare buffer passes (`BufferA` through `BufferD`) before the final `Image`
+pass. Each pass binds up to four channels (`iChannel0`–`iChannel3`) to an
+earlier buffer or the built-in `Keyboard` texture. Set `"history": true` to read
+a buffer's previous-frame image for feedback; ordinary buffer links read the
+current frame. Shader files remain individual `.frag` files.
 
 ```json
 {
     "passes": [
-        { "id": "BufferA", "file": "buffer-a.frag", "inputs": [] },
+        {
+            "id": "BufferA",
+            "file": "buffer-a.frag",
+            "inputs": [
+                { "channel": 0, "source": "BufferA", "history": true },
+                { "channel": 1, "source": "Keyboard" }
+            ]
+        },
         {
             "id": "Image",
             "file": "image.frag",
@@ -45,8 +56,12 @@ keyboard texture. The manifest is configuration only: all shader code remains in
 }
 ```
 
-The initial viewer will focus on single-pass files; manifest-based buffers and
-interactive inputs are planned follow-up features.
+The `Keyboard` texture has 256 columns (key codes) and three rows: down, pressed
+for one frame, and toggled. For example,
+`texelFetch(iChannel1, ivec2(32, 0), 0).r` reads whether Space is held when
+`Keyboard` is bound to channel 1. `iMouse` contains the pointer position in
+pixels in `.xy`; `.zw` stores the click position, positive while held and
+negative after release.
 
 ## Project checks
 

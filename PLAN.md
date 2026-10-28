@@ -38,7 +38,7 @@
 - [x] Build the single-pass viewer and test setup.
 - [x] Split the viewer UI into components and migrate application source to
       TypeScript.
-- [ ] Add buffer passes and interactive keyboard/mouse inputs.
+- [x] Add buffer passes and interactive keyboard/mouse inputs.
 - [ ] Plan and implement deployment (for example, Cloudflare Pages); decide
       deployment details later.
 - [ ] Remove this temporary checkpoint when the project work is complete.
