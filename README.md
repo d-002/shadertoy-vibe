@@ -34,14 +34,14 @@ keyboard texture. The manifest is configuration only: all shader code remains in
 
 ```json
 {
-  "passes": [
-    { "id": "BufferA", "file": "buffer-a.frag", "inputs": [] },
-    {
-      "id": "Image",
-      "file": "image.frag",
-      "inputs": [{ "channel": 0, "source": "BufferA" }]
-    }
-  ]
+    "passes": [
+        { "id": "BufferA", "file": "buffer-a.frag", "inputs": [] },
+        {
+            "id": "Image",
+            "file": "image.frag",
+            "inputs": [{ "channel": 0, "source": "BufferA" }]
+        }
+    ]
 }
 ```
 
