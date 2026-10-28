@@ -283,6 +283,7 @@ body {
     height: 5px;
 }
 .status-text {
+    min-width: 15ch;
     font:
         9px ui-monospace,
         SFMono-Regular,
