@@ -1,6 +1,6 @@
 # Project checkpoint
 
-**You are here: step 3 complete; next is buffer passes and interactive inputs.**
+**You are here: local viewer and buffer/input support are complete; next is deployment planning.**
 
 ## Agreed direction
 
@@ -39,6 +39,7 @@
 - [x] Split the viewer UI into components and migrate application source to
       TypeScript.
 - [x] Add buffer passes and interactive keyboard/mouse inputs.
+- [x] Add an example that demonstrates buffer feedback and keyboard/mouse input.
 - [ ] Plan and implement deployment (for example, Cloudflare Pages); decide
       deployment details later.
 - [ ] Remove this temporary checkpoint when the project work is complete.
