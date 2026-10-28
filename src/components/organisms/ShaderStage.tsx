@@ -10,6 +10,7 @@ interface ShaderStageProps {
     loading: boolean;
     error: string;
     playing: boolean;
+    resetKey: number;
     onRenderError: (message: string) => void;
     stageRef: RefObject<HTMLDivElement | null>;
 }
@@ -20,6 +21,7 @@ export function ShaderStage({
     loading,
     error,
     playing,
+    resetKey,
     onRenderError,
     stageRef,
 }: ShaderStageProps) {
@@ -29,6 +31,7 @@ export function ShaderStage({
                 <ShaderCanvas
                     project={project}
                     playing={playing}
+                    resetKey={resetKey}
                     onError={onRenderError}
                 />
             )}

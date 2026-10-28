@@ -3,6 +3,7 @@ import type { ShaderProject } from '../../types/shader';
 import { useFullscreen } from '../../hooks/useFullscreen';
 import { FullscreenButton } from '../molecules/FullscreenButton';
 import { PlaybackControls } from '../molecules/PlaybackControls';
+import { PreviewTimer } from '../molecules/PreviewTimer';
 import { ViewerHeading } from '../molecules/ViewerHeading';
 import { ShaderStage } from './ShaderStage';
 
@@ -12,6 +13,9 @@ interface ViewerPanelProps {
     loading: boolean;
     error: string;
     playing: boolean;
+    elapsed: number;
+    resetKey: number;
+    onResetTime: () => void;
     onTogglePlayback: () => void;
     onRenderError: (message: string) => void;
 }
@@ -22,6 +26,9 @@ export function ViewerPanel({
     loading,
     error,
     playing,
+    elapsed,
+    resetKey,
+    onResetTime,
     onTogglePlayback,
     onRenderError,
 }: ViewerPanelProps) {
@@ -38,6 +45,7 @@ export function ViewerPanel({
                 error={error}
                 playing={playing}
                 onRenderError={onRenderError}
+                resetKey={resetKey}
                 stageRef={stageRef}
             />
             <div className="control-bar">
@@ -45,6 +53,7 @@ export function ViewerPanel({
                     playing={playing}
                     onToggle={onTogglePlayback}
                 />
+                <PreviewTimer elapsed={elapsed} onReset={onResetTime} />
                 <FullscreenButton onClick={toggleFullscreen} />
             </div>
             <div className="hint">

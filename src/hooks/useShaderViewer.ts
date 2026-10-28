@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { ShaderInfo, ShaderProject } from '../types/shader';
+import {
+    ShaderInputSource,
+    type ShaderInfo,
+    type ShaderProject,
+} from '../types/shader';
 
 function errorMessage(error: unknown): string {
     return error instanceof Error ? error.message : String(error);
@@ -16,7 +20,10 @@ export function useShaderViewer() {
         try {
             const response = await fetch('/api/shaders');
             if (!response.ok) {
-                throw new Error(`Could not load shaders (${response.status}).`);
+                const details = await response.text();
+                throw new Error(
+                    details || `Could not load shaders (${response.status}).`,
+                );
             }
             const items = (await response.json()) as ShaderInfo[];
             setShaders(items);
@@ -43,11 +50,15 @@ export function useShaderViewer() {
                 `/api/shaders/${encodeURIComponent(id)}/project`,
             );
             if (!response.ok) {
-                throw new Error(`Could not load ${id} (${response.status}).`);
+                const details = await response.text();
+                throw new Error(
+                    details || `Could not load ${id} (${response.status}).`,
+                );
             }
             setProject((await response.json()) as ShaderProject);
             setError('');
         } catch (loadError) {
+            setProject(null);
             setError(errorMessage(loadError));
         } finally {
             setLoading(false);
@@ -73,7 +84,8 @@ export function useShaderViewer() {
             const usesAsset = project?.passes.some((pass) =>
                 pass.inputs.some(
                     (input) =>
-                        input.source === 'Texture' && input.file === data.file,
+                        input.source === ShaderInputSource.Texture &&
+                        input.file === data.file,
                 ),
             );
             if (usesAsset) void loadSource(selectedId);

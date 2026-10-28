@@ -15,11 +15,18 @@ import { loadShaderImages } from '../utils/shaderImages';
 interface ShaderCanvasProps {
     project: ShaderProject;
     playing: boolean;
+    resetKey: number;
     onError: (message: string) => void;
 }
 
-export function ShaderCanvas({ project, playing, onError }: ShaderCanvasProps) {
+export function ShaderCanvas({
+    project,
+    playing,
+    resetKey,
+    onError,
+}: ShaderCanvasProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const rendererRef = useRef<WebGLRenderer | null>(null);
     const mouseRef = useRef<[number, number, number, number]>([0, 0, 0, 0]);
     const pointerRef = useRef<MousePointerState>({
         down: false,
@@ -75,6 +82,7 @@ export function ShaderCanvas({ project, playing, onError }: ShaderCanvasProps) {
             .then((images) => {
                 if (!active) return;
                 renderer = createWebGLRenderer(canvas, project, images);
+                rendererRef.current = renderer;
                 onError('');
                 drawRef.current = draw;
                 draw(performance.now());
@@ -89,8 +97,16 @@ export function ShaderCanvas({ project, playing, onError }: ShaderCanvasProps) {
             cancelAnimationFrame(rafRef.current);
             rafRef.current = 0;
             renderer?.dispose();
+            rendererRef.current = null;
         };
     }, [project, onError, clearPressed, keyboardStateRef]);
+
+    useEffect(() => {
+        const renderer = rendererRef.current;
+        if (!renderer) return;
+        renderer.reset();
+        schedulePausedDraw();
+    }, [resetKey, schedulePausedDraw]);
 
     const updateMouse = (
         event: PointerEvent<HTMLCanvasElement>,

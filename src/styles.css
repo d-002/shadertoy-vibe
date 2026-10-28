@@ -231,6 +231,22 @@ body {
     align-items: center;
     border-bottom: 1px solid #292830;
 }
+.preview-timer {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #aaa7b0;
+    font:
+        11px ui-monospace,
+        SFMono-Regular,
+        Consolas,
+        monospace;
+    font-variant-numeric: tabular-nums;
+}
+.preview-timer output {
+    min-width: 58px;
+    text-align: center;
+}
 .playback-controls {
     display: flex;
     align-items: center;

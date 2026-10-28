@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useShaderViewer } from './hooks/useShaderViewer';
 import { AppHeader } from './components/organisms/AppHeader';
 import { ShaderLibrary } from './components/organisms/ShaderLibrary';
@@ -7,7 +8,22 @@ import './styles.css';
 
 export default function App() {
     const viewer = useShaderViewer();
-    const playback = usePlayback();
+    const playback = usePlayback(Boolean(viewer.project) && !viewer.loading);
+    const resetPlayback = playback.reset;
+    const previousProjectRef = useRef(viewer.project);
+    const hasLoadedProjectRef = useRef(false);
+
+    useEffect(() => {
+        if (
+            viewer.project &&
+            hasLoadedProjectRef.current &&
+            previousProjectRef.current !== viewer.project
+        ) {
+            resetPlayback();
+        }
+        if (viewer.project) hasLoadedProjectRef.current = true;
+        previousProjectRef.current = viewer.project;
+    }, [viewer.project, resetPlayback]);
 
     return (
         <main className="app-shell">
@@ -25,6 +41,9 @@ export default function App() {
                     error={viewer.error}
                     playing={playback.playing}
                     onTogglePlayback={playback.toggle}
+                    elapsed={playback.elapsed}
+                    resetKey={playback.resetKey}
+                    onResetTime={playback.reset}
                     onRenderError={viewer.setError}
                 />
             </div>
