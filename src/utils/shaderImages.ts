@@ -1,4 +1,4 @@
-import type { ShaderProject } from '../types/shader';
+import { ShaderInputSource, type ShaderProject } from '../types/shader';
 
 export async function loadShaderImages(
     project: ShaderProject,
@@ -6,7 +6,9 @@ export async function loadShaderImages(
     const files = new Set(
         project.passes.flatMap((pass) =>
             pass.inputs.flatMap((input) =>
-                input.source === 'Texture' && input.file ? [input.file] : [],
+                input.source === ShaderInputSource.Texture && input.file
+                    ? [input.file]
+                    : [],
             ),
         ),
     );

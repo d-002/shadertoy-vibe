@@ -2,11 +2,16 @@ export const BUFFER_IDS = ['BufferA', 'BufferB', 'BufferC', 'BufferD'] as const;
 
 export type BufferId = (typeof BUFFER_IDS)[number];
 export type ShaderPassId = BufferId | 'Image';
-export type ShaderInputSource = BufferId | 'Keyboard' | 'Texture';
+export enum ShaderInputSource {
+    Keyboard = 'Keyboard',
+    Texture = 'Texture',
+}
+
+export type ShaderChannelSource = BufferId | ShaderInputSource;
 
 export interface ShaderInput {
     channel: number;
-    source: ShaderInputSource;
+    source: ShaderChannelSource;
     history?: boolean;
     file?: string;
 }

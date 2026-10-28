@@ -1,3 +1,4 @@
+import { ShaderInputSource } from '../types/shader';
 import type {
     BufferId,
     ShaderInput,
@@ -42,6 +43,7 @@ export interface WebGLRenderer {
         isPlaying: boolean,
         keyboard: KeyboardState,
     ): void;
+    reset(): void;
     dispose(): void;
 }
 
@@ -63,7 +65,9 @@ export function createWebGLRenderer(
     let keyboardTexture: WebGLTexture | null = null;
     const imageTextures = new Map<string, InputTexture>();
     const usesKeyboard = project.passes.some((pass) =>
-        pass.inputs.some((input) => input.source === 'Keyboard'),
+        pass.inputs.some(
+            (input) => input.source === ShaderInputSource.Keyboard,
+        ),
     );
     try {
         for (const pass of project.passes) {
@@ -84,7 +88,7 @@ export function createWebGLRenderer(
         const imageFiles = new Set(
             project.passes.flatMap((pass) =>
                 pass.inputs.flatMap((input) =>
-                    input.source === 'Texture' && input.file
+                    input.source === ShaderInputSource.Texture && input.file
                         ? [input.file]
                         : [],
                 ),
@@ -202,6 +206,14 @@ export function createWebGLRenderer(
             }
             frame += 1;
             previous = now;
+        },
+        reset() {
+            frame = 0;
+            elapsed = 0;
+            previous = 0;
+            playing = undefined;
+            for (const buffer of buffers.values()) buffer.current = 0;
+            resizeBuffers(gl, buffers, bufferWidth, bufferHeight);
         },
         dispose() {
             disposePasses(gl, passes);
@@ -443,7 +455,7 @@ function inputTexture(
     input: ShaderInput,
     options: RenderPassOptions,
 ): InputTexture {
-    if (input.source === 'Texture') {
+    if (input.source === ShaderInputSource.Texture) {
         const image = input.file
             ? options.imageTextures.get(input.file)
             : undefined;
@@ -451,7 +463,7 @@ function inputTexture(
             throw new Error(`Image asset ${input.file} was not loaded.`);
         return image;
     }
-    if (input.source === 'Keyboard') {
+    if (input.source === ShaderInputSource.Keyboard) {
         return {
             texture: options.keyboardTexture,
             width: 256,

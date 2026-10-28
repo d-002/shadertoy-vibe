@@ -1,8 +1,9 @@
 import {
     BUFFER_IDS,
     type BufferId,
+    type ShaderChannelSource,
     type ShaderInput,
-    type ShaderInputSource,
+    ShaderInputSource,
     type ShaderManifest,
     type ShaderPass,
     type ShaderPassId,
@@ -37,7 +38,11 @@ function parseInput(value: unknown, passId: string): ShaderInput {
             `Input channels for ${passId} must be integers from 0 to 3.`,
         );
     }
-    if (source !== 'Keyboard' && source !== 'Texture' && !isBufferId(source)) {
+    if (
+        source !== ShaderInputSource.Keyboard &&
+        source !== ShaderInputSource.Texture &&
+        !isBufferId(source)
+    ) {
         throw new Error(
             `Input source for ${passId} must be a buffer, Keyboard, ` +
                 'or Texture.',
@@ -49,7 +54,7 @@ function parseInput(value: unknown, passId: string): ShaderInput {
     if (history && !isBufferId(source)) {
         throw new Error('Only buffer inputs can use history.');
     }
-    if (source === 'Texture') {
+    if (source === ShaderInputSource.Texture) {
         if (
             typeof file !== 'string' ||
             !/^[\w.-]+\.(png|jpe?g|webp)$/i.test(file) ||
@@ -67,9 +72,11 @@ function parseInput(value: unknown, passId: string): ShaderInput {
 
     return {
         channel: Number(channel),
-        source: source as ShaderInputSource,
+        source: source as ShaderChannelSource,
         ...(history ? { history: true } : {}),
-        ...(source === 'Texture' ? { file: file as string } : {}),
+        ...(source === ShaderInputSource.Texture
+            ? { file: file as string }
+            : {}),
     };
 }
 
@@ -127,7 +134,10 @@ export function parseShaderManifest(value: unknown): ShaderManifest {
     const positions = new Map(ids.map((id, index) => [id, index]));
     passes.forEach((pass, index) => {
         for (const input of pass.inputs) {
-            if (input.source === 'Keyboard' || input.source === 'Texture')
+            if (
+                input.source === ShaderInputSource.Keyboard ||
+                input.source === ShaderInputSource.Texture
+            )
                 continue;
             const sourceIndex = positions.get(input.source);
             if (sourceIndex === undefined) {

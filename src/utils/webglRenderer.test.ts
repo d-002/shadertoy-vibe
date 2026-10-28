@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { ShaderProject } from '../types/shader';
+import { ShaderInputSource, type ShaderProject } from '../types/shader';
 import { createWebGLRenderer } from './webglRenderer';
 
 function createFakeContext() {
@@ -105,7 +105,7 @@ const project: ShaderProject = {
             source: 'void mainImage(out vec4 c, in vec2 p) { c = vec4(1.0); }',
             inputs: [
                 { channel: 0, source: 'BufferA', history: true },
-                { channel: 1, source: 'Keyboard' },
+                { channel: 1, source: ShaderInputSource.Keyboard },
             ],
         },
         {
@@ -150,7 +150,11 @@ describe('WebGL renderer', () => {
                     file: 'main.frag',
                     source: 'shader source',
                     inputs: [
-                        { channel: 0, source: 'Texture', file: 'sample.jpg' },
+                        {
+                            channel: 0,
+                            source: ShaderInputSource.Texture,
+                            file: 'sample.jpg',
+                        },
                     ],
                 },
             ],
@@ -182,6 +186,30 @@ describe('WebGL renderer', () => {
             { name: 'iChannelResolution[0]' },
             new Float32Array([96, 64, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
         );
+        renderer.dispose();
+    });
+
+    it('resets shader time, frame count, and feedback buffers', () => {
+        const { gl } = createFakeContext();
+        const renderer = createWebGLRenderer(
+            createCanvas(gl as unknown as WebGL2RenderingContext),
+            project,
+        );
+        const keyboard = {
+            down: new Set<number>(),
+            pressed: new Set<number>(),
+            toggled: new Set<number>(),
+        };
+        renderer.render(1000, [0, 0, 0, 0], true, keyboard);
+        renderer.render(1100, [0, 0, 0, 0], true, keyboard);
+        const allocationsBeforeReset = gl.texImage2D.mock.calls.length;
+
+        renderer.reset();
+        renderer.render(1200, [0, 0, 0, 0], true, keyboard);
+
+        expect(gl.texImage2D).toHaveBeenCalledTimes(allocationsBeforeReset + 2);
+        expect(gl.uniform1i).toHaveBeenCalledWith({ name: 'iFrame' }, 0);
+        expect(gl.uniform1f).toHaveBeenCalledWith({ name: 'iTime' }, 0);
         renderer.dispose();
     });
 
